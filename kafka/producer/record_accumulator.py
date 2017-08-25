@@ -57,7 +57,8 @@ class ProducerBatch(object):
 
     def try_append(self, timestamp_ms, key, value):
         offset = self.records.next_offset()
-        checksum, record_size = self.records.append(timestamp_ms, key, value)
+        checksum, record_size = self.records.append(
+            timestamp_ms, key, value, headers=[])
         if record_size == 0:
             return None
 

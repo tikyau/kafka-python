@@ -1,8 +1,8 @@
+from __future__ import unicode_literals
 import pytest
 from kafka.record.legacy_records import (
     LegacyRecordBatch, LegacyRecordBatchBuilder
 )
-from kafka.protocol.message import Message
 
 
 @pytest.mark.parametrize("magic", [0, 1])
@@ -27,9 +27,9 @@ def test_read_write_serde_v0_v1_no_compression(magic):
 
 
 @pytest.mark.parametrize("compression_type", [
-    Message.CODEC_GZIP,
-    Message.CODEC_SNAPPY,
-    Message.CODEC_LZ4
+    LegacyRecordBatch.CODEC_GZIP,
+    LegacyRecordBatch.CODEC_SNAPPY,
+    LegacyRecordBatch.CODEC_LZ4
 ])
 @pytest.mark.parametrize("magic", [0, 1])
 def test_read_write_serde_v0_v1_with_compression(compression_type, magic):
@@ -83,3 +83,67 @@ def test_estimate_size_in_bytes_bigger_than_batch(magic):
     buf = builder.build()
     assert len(buf) <= estimate_size, \
         "Estimate should always be upper bound"
+
+
+@pytest.mark.parametrize("magic", [0, 1])
+def test_legacy_batch_builder_validates_arguments(magic):
+    builder = LegacyRecordBatchBuilder(
+        magic=magic, compression_type=0, batch_size=1024 * 1024)
+
+    # Key should not be str
+    with pytest.raises(TypeError):
+        builder.append(
+            0, timestamp=9999999, key="some string", value=None)
+
+    # Value should not be str
+    with pytest.raises(TypeError):
+        builder.append(
+            0, timestamp=9999999, key=None, value="some string")
+
+    # Timestamp should be of proper type
+    with pytest.raises(TypeError):
+        builder.append(
+            0, timestamp="1243812793", key=None, value=b"some string")
+
+    # Offset of invalid type
+    with pytest.raises(TypeError):
+        builder.append(
+            "0", timestamp=9999999, key=None, value=b"some string")
+
+    # Ok to pass value as None
+    builder.append(
+        0, timestamp=9999999, key=b"123", value=None)
+
+    # Timestamp can be None
+    builder.append(
+        1, timestamp=None, key=None, value=b"some string")
+
+    # Ok to pass offsets in not incremental order. This should not happen thou
+    builder.append(
+        5, timestamp=9999999, key=b"123", value=None)
+
+    # in case error handling code fails to fix inner buffer in builder
+    assert len(builder.build()) == 119 if magic else 95
+
+
+@pytest.mark.parametrize("magic", [0, 1])
+def test_legacy_batch_size_limit(magic):
+    # First message can be added even if it's too big
+    builder = LegacyRecordBatchBuilder(
+        magic=magic, compression_type=0, batch_size=1024)
+    crc, size = builder.append(0, timestamp=None, key=None, value=b"M" * 2000)
+    assert size > 0
+    assert crc is not None
+    assert len(builder.build()) > 2000
+
+    builder = LegacyRecordBatchBuilder(
+        magic=magic, compression_type=0, batch_size=1024)
+    crc, size = builder.append(0, timestamp=None, key=None, value=b"M" * 700)
+    assert size > 0
+    crc, size = builder.append(1, timestamp=None, key=None, value=b"M" * 700)
+    assert size == 0
+    assert crc is None
+    crc, size = builder.append(2, timestamp=None, key=None, value=b"M" * 700)
+    assert size == 0
+    assert crc is None
+    assert len(builder.build()) < 1000
