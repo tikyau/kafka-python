@@ -52,14 +52,6 @@ kafka.protocol.group module
     :undoc-members:
     :show-inheritance:
 
-kafka.protocol.legacy module
-----------------------------
-
-.. automodule:: kafka.protocol.legacy
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 kafka.protocol.message module
 -----------------------------
 

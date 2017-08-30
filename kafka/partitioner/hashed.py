@@ -26,24 +26,6 @@ class Murmur2Partitioner(Partitioner):
         return partitions[idx]
 
 
-class LegacyPartitioner(object):
-    """DEPRECATED -- See Issue 374
-
-    Implements a partitioner which selects the target partition based on
-    the hash of the key
-    """
-    def __init__(self, partitions):
-        self.partitions = partitions
-
-    def partition(self, key, partitions=None):
-        if not partitions:
-            partitions = self.partitions
-        size = len(partitions)
-        idx = hash(key) % size
-
-        return partitions[idx]
-
-
 # Default will change to Murmur2 in 0.10 release
 HashedPartitioner = LegacyPartitioner
 
