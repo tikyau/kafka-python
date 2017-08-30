@@ -23,6 +23,7 @@ kafka.cluster module
     :show-inheritance:
 
 
+# TODO should this be pointing at client_async?
 kafka.client module
 -------------------
 

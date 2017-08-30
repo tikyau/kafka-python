@@ -25,7 +25,7 @@ from kafka.producer import KafkaProducer
 from kafka.conn import BrokerConnection
 from kafka.protocol import (
     create_message, create_gzip_message, create_snappy_message)
-from kafka.partitioner import RoundRobinPartitioner, HashedPartitioner, Murmur2Partitioner
+from kafka.partitioner import RoundRobinPartitioner, HashedPartitioner, Murmur2Partitioner  # TODO Murmur2Partitioner might be removable?
 from kafka.structs import TopicPartition, OffsetAndMetadata
 from kafka.serializer import Serializer, Deserializer
 

@@ -26,6 +26,7 @@ class Murmur2Partitioner(Partitioner):
         return partitions[idx]
 
 
+# TODO is this already done?
 # Default will change to Murmur2 in 0.10 release
 HashedPartitioner = LegacyPartitioner
 
