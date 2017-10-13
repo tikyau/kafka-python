@@ -128,7 +128,7 @@ class MemoryRecordsBuilder(object):
         self._closed = False
         self._bytes_written = 0
 
-    def append(self, timestamp, key, value, headers):
+    def append(self, timestamp, key, value, headers=[]):
         """ Append a message to the buffer.
 
         Returns:

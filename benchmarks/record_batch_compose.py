@@ -59,7 +59,7 @@ def func(loops, magic):
         for _ in range(MESSAGES_PER_BATCH):
             key, value, timestamp = next(precomputed_samples)
             size = batch.append(
-                timestamp=timestamp, key=key, value=value, headers=[])
+                timestamp=timestamp, key=key, value=value)
             assert size
         batch.close()
         results.append(batch.buffer())
