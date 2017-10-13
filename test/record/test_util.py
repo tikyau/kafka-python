@@ -48,14 +48,17 @@ varint_data = [
 
 @pytest.mark.parametrize("encoded, decoded", varint_data)
 def test_encode_varint(encoded, decoded):
-    assert util.encode_varint(decoded) == encoded
+    res = bytearray()
+    util.encode_varint(decoded, res.append)
+    assert res == encoded
 
 
 @pytest.mark.parametrize("encoded, decoded", varint_data)
 def test_decode_varint(encoded, decoded):
     # We add a bit of bytes around just to check position is calculated
     # correctly
-    value, pos = util.decode_varint(b"\x01\xf0" + encoded + b"\xff\x01", 2)
+    value, pos = util.decode_varint(
+        bytearray(b"\x01\xf0" + encoded + b"\xff\x01"), 2)
     assert value == decoded
     assert pos - 2 == len(encoded)
 
